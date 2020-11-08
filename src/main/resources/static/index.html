@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ManMon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="mystyle.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.2.0/angular-material.min.css">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular-route.js"></script>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular-animate.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular-aria.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular-messages.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.2.0/angular-material.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+
+    <script src="module.js"></script>
+    <script src="index.controller.js"></script>
+    <script src="directive/data.view.directive.js"></script>
+    <script src="manmon.service.js"></script>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+<body ng-app="manmon" ng-controller="homeController as vm" ng-cloak style="overflow:hidden">
+    <div style="height: 100%; width: 100%;" ng-if="vm.toViewController">
+        <div layout="row" style="height: 12%; width: 100%;">
+            <!-- <div layout="column"
+                style="width: 15%; height: 100%; background-image: url('manmonIcon.png');background-repeat: no-repeat;background-size: 100% 100%;">
+            </div> -->
+            <div layout="column"
+                style="width: 100%;padding-left: 30px;background-image: url('iot.png');background-repeat: no-repeat;background-size: cover"
+                layout-align="start center">
+                <div layout="row" style="width: 100%; height: 100%;">
+
+                    <div layout="column"
+                        style="width: 100%; height: 100%;background-image: url('webheader.png');background-repeat: no-repeat;background-size: 100% 150%;">
+
+                        <div layout="row" style="width: 100%; height: 100%;">
+                            <div layout="column"
+                                style="width: 20%;height: 100%; background-image: url('manmonIcon.png');background-repeat: no-repeat;background-size: 100% 100%;">
+                            </div>
+                            <div layout="column" style="width: 70%;"></div>
+                            <div layout="column"
+                                style="width: 10%;height: 100%; background-image: url('msbd.png');background-repeat: no-repeat;background-size: 100% 100%;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <md-tabs md-dynamic-height style="background: #99c0e0;">
+            <md-tab label="Home">
+                <div layout="row" style="height:63%;width: 100%; background-color: white;">
+                    <div layout="column" style="height:97%; width:80%; margin: 10px;overflow-y: scroll;">
+                        <div layout="row"
+                            style="width: 99%; height: 300px; margin-bottom: 5px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 10px;">
+                            <div layout="column" style="width: 20%; height: 100%;">
+                                <div layout="row"
+                                    style="width: 92%; height: 295px;border: 0px solid black;margin-top: 10px; margin-bottom: 10px; margin-left: 15px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 10px;">
+                                    <div class="card" layout="column" layout-align="center center"
+                                        ng-class="{'red' : temperature >= vm.temperatureMaxThreshold || temperature <= vm.temperatureMinThreshold}">
+                                        <h3>Temperature</h3>
+                                        <!-- <h3>Cloudy<span>Wind 10km/h <span class="dot">•</span> Precip 0%</span></h3> -->
+                                        <h1> <b> {{temperature}}°C </b> </h1>
+                                        <div>
+                                            ({{vm.temperatureMinThreshold}}°C - {{vm.temperatureMaxThreshold}}°C)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="curve_chart" style="width: 100%; height: 300px" layout="column"
+                                style="width: 80%; height: 100%;"></div>
+                        </div>
+
+                        <div layout="row"
+                            style="width: 99%; height: 300px;margin-bottom: 5px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 10px;">
+                            <div layout="column" style="width: 20%; height: 100%;">
+                                <div layout="row"
+                                    style="width: 92%; height: 295px;border: 0px solid black;margin-top: 10px; margin-bottom: 10px; margin-left: 15px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 10px;">
+                                    <div class="card" layout="column" layout-align="center center"
+                                        ng-class="{'red' : vm.noiseMin == 1 && vm.NoiseMax == 0}">
+
+                                        <!-- <h3>Cloudy<span>Wind 10km/h <span class="dot">•</span> Precip 0%</span></h3> -->
+                                        <h3>Noise</h3>
+                                        <h3 ng-if="vm.noiseMax==0">Max: Normal</h3>
+                                        <h3 ng-if="vm.noiseMin==1">Min: Normal</h3>
+
+                                        <h3 ng-if="vm.noiseMax==1">Max: <b> Abnormal </b></h3>
+                                        <h3 ng-if="vm.noiseMin==0">Min: <b> Abnormal </b></h3>
+                                        <div>
+                                            (NoiseMax: {{vm.noiseMax}} and NoiseMin: {{vm.noiseMin}})
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="curve_chart4" style="width: 100%; height: 300px" layout="column"
+                                style="width: 80%; height: 100%;"></div>
+                        </div>
+
+                        <div layout="row"
+                            style="width: 99%; height: 300px;margin-bottom: 5px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 10px;">
+                            <div layout="column" style="width: 20%; height: 100%;">
+                                <div layout="row"
+                                    style="width: 92%; height: 295px;border: 0px solid black;margin-top: 10px; margin-bottom: 10px; margin-left: 15px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 10px;">
+                                    <div class="card" layout="column" layout-align="center center"
+                                        ng-class="{'red' : humidity >= vm.humidityMaxThreshold ||  humidity <= vm.humidityMinThreshold}">
+                                        <h2>Humidity</h2>
+                                        <!-- <h3>Cloudy<span>Wind 10km/h <span class="dot">•</span> Precip 0%</span></h3> -->
+                                        <h1> <b> {{humidity}}% </b></h1>
+                                        <div>
+                                            ({{vm.humidityMinThreshold}}% - {{vm.humidityMaxThreshold}}%)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="curve_chart2" style="width: 100%; height: 300px" layout="column"
+                                style="width: 80%; height: 100%;"></div>
+                        </div>
+
+                        <div layout="row"
+                            style="width: 99%; height: 300px;margin-bottom: 5px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 10px;">
+                            <div layout="column" style="width: 20%; height: 100%;">
+                                <div layout="row"
+                                    style="width: 92%; height: 295px;border: 0px solid black;margin-top: 10px; margin-bottom: 10px; margin-left: 15px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 10px;">
+                                    <div class="card" layout="column" layout-align="center center"
+                                        ng-class="{'red' : ligntIntensity >= vm.lightMaxThreshold || ligntIntensity <= vm.lightMinThreshold}">
+                                        <h2>Light</h2>
+                                        <!-- <h3>Cloudy<span>Wind 10km/h <span class="dot">•</span> Precip 0%</span></h3> -->
+                                        <h1> <b> {{ligntIntensity}}LUX </b> </h1>
+                                        <div>
+                                            ({{vm.lightMinThreshold}}LUX - {{vm.lightMaxThreshold}}LUX)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="curve_chart3" style="width: 100%; height: 300px" layout="column"
+                                style="width: 80%; height: 100%;"></div>
+                        </div>
+                    </div>
+
+
+                    <div layout="column" layout-wrap flex
+                        style="height:95% ;min-height: 95%; width:20%; margin-left:5px;margin-right:5px;  margin-top: 5px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 10px;padding-top:10px;">
+                        
+                        <div layout="row" style="width: 100%; height: 30px; padding: 15px; background-color: #b4e7eb;"
+                            layout-align='center center'>
+                            <h4>Environment Control</h4>
+                        </div>
+
+                        <div layout="row" style="width: 100%; padding-left: 15px; margin-bottom: 5px;">
+                            <div layout="column" style="width: 30%;" layout-align="center start">
+                                <div layout="row">
+                                    <b>Environment</b>
+                                </div>
+                            </div>
+                            <div layout="column" style="width: 20%;margin-left: 20px;" layout-align="end start">
+                                <div layout="row" flex="100"
+                                    style="height:50px; width:54px; padding-top: 15px;"><b>Status</b>
+                                </div>
+                            </div>
+                            <div ng-if="vm.dehumidifierProgress" layout="column" style="width: 30%;padding-top:25px"
+                                layout-align="center end">
+                                <!-- <md-progress-circular md-mode="determinate" value="{{vm.determinateValue}}">
+                                </md-progress-circular> -->
+                            </div>
+                            <div ng-if="!vm.dehumidifierProgress" layout="column" style="width: 30%;padding-top:25px"
+                                layout-align="center end">
+                            </div>
+                            <div layout="column" style="width: 20%; padding-right: 20px;" layout-align="center end">
+                                <b>switch</b>
+                            </div>
+                        </div>
+
+                        <div layout="row" style="width: 100%; padding-left: 15px; margin-bottom: 5px;">
+                            <div layout="column" style="width: 30%;" layout-align="center start">
+                                <div layout="row">
+                                    Light
+                                </div>
+                            </div>
+                            <div layout="column" style="width: 20%;margin-left: 20px;" layout-align="end start">
+                                <div layout="row" flex="100" ng-if="ligntIntensity >=vm.lightMinThreshold && ligntIntensity <=vm.lightMaxThreshold"
+                                    style="height:50px; width:54px; padding-top: 22px;"><img src="tick.svg"
+                                        alt="Girl in a jacket" width="20" height="20">
+                                </div>
+                                <div layout="row" flex="100" ng-if="ligntIntensity < vm.lightMinThreshold || ligntIntensity > vm.lightMaxThreshold"
+                                    style="height:50px; width:54px;padding-top: 22px;"><img src="cross.png"
+                                        alt="Girl in a jacket" width="20" height="20">
+                                </div>
+                            </div>
+                            <div ng-if="vm.lampProgress" layout="column" style="width: 30%;padding-top:25px"
+                                layout-align="center end">
+                                <!-- <md-progress-circular md-mode="determinate" value="{{vm.determinateValue}}">
+                                </md-progress-circular> -->
+                            </div>
+                            <div ng-if="!vm.lampProgress" layout="column" style="width: 30%;padding-top:25px"
+                                layout-align="center end">
+                            </div>
+                            <div layout="column" style="width: 20%; padding-right: 20px;" layout-align="center end">
+                                <md-switch ng-click="vm.lampOnOff()" aria-label="Switch 1"
+                                    ng-model="vm.lampSwitchStatus">
+                                </md-switch>
+                            </div>
+                        </div>
+
+
+
+
+                        <div layout="row" style="width: 100%; padding-left: 15px; margin-bottom: 5px;">
+                            <div layout="column" style="width: 30%;" layout-align="center start">
+                                <div layout="row">
+                                    Dehumidifier
+                                </div>
+                            </div>
+                            <div layout="column" style="width: 20%;margin-left: 20px;" layout-align="end start">
+                                <div layout="row" flex="100" ng-if="humidity >=vm.humidityMinThreshold && humidity <=vm.humidityMaxThreshold"
+                                    style="height:50px; width:54px; padding-top: 22px;"><img src="tick.svg"
+                                        alt="Girl in a jacket" width="20" height="20">
+                                </div>
+                                <div layout="row" flex="100" ng-if="humidity < vm.humidityMinThreshold || humidity > vm.humidityMaxThreshold"
+                                    style="height:50px; width:54px;padding-top: 22px;"><img src="cross.png"
+                                        alt="Girl in a jacket" width="20" height="20">
+                                </div>
+                            </div>
+                            <div ng-if="vm.dehumidifierProgress" layout="column" style="width: 30%;padding-top:25px"
+                                layout-align="center end">
+                                <!-- <md-progress-circular md-mode="determinate" value="{{vm.determinateValue}}">
+                                </md-progress-circular> -->
+                            </div>
+                            <div ng-if="!vm.dehumidifierProgress" layout="column" style="width: 30%;padding-top:25px"
+                                layout-align="center end">
+                            </div>
+                            <div layout="column" style="width: 20%; padding-right: 20px;" layout-align="center end">
+                                <md-switch ng-click="vm.dehumidifierOnOff()" aria-label="Switch 1"
+                                    ng-model="vm.dehumidifierSwitchStatus">
+                                </md-switch>
+                            </div>
+                        </div>
+
+
+                        <div layout="row" style="width: 100%; padding-left: 15px; margin-bottom: 5px;">
+                            <div layout="column" style="width: 30%;" layout-align="center start">
+                                <div layout="row">
+                                    Water
+                                </div>
+                            </div>
+                            <div layout="column" style="width: 20%;margin-left: 20px;" layout-align="end start">
+                                <div layout="row" flex="100" ng-if="false"
+                                    style="height:50px; width:54px; padding-top: 22px;"><img src="tick.svg"
+                                        alt="Girl in a jacket" width="20" height="20">
+                                </div>
+                                <div layout="row" flex="100" ng-if="true"
+                                    style="height:50px; width:54px;padding-top: 22px;"><img src="cross.png"
+                                        alt="Girl in a jacket" width="20" height="20">
+                                </div>
+                            </div>
+                            <div ng-if="vm.dehumidifierProgress" layout="column" style="width: 30%;padding-top:25px"
+                                layout-align="center end">
+                                <md-progress-circular md-mode="determinate" value="{{vm.determinateValue}}">
+                                </md-progress-circular>
+                            </div>
+                            <div ng-if="!vm.dehumidifierProgress" layout="column" style="width: 30%;padding-top:25px"
+                                layout-align="center end">
+                            </div>
+                            <div layout="column" style="width: 20%; padding-right: 20px;" layout-align="center end">
+                                <md-switch ng-click="" aria-label="Switch 1" ng-disabled="true"
+                                    ng-model="">
+                                </md-switch>
+                            </div>
+                        </div>
+                        <div layout="row" style="width: 100%; padding-left: 15px; margin-bottom: 5px;">
+                            <div layout="column" style="width: 30%;" layout-align="center start">
+                                <div layout="row">
+                                    Power
+                                </div>
+                            </div>
+                            <div layout="column" style="width: 20%;margin-left: 20px;" layout-align="end start">
+                                <div layout="row" flex="100" ng-if="true"
+                                    style="height:50px; width:54px; padding-top: 22px;"><img src="tick.svg"
+                                        alt="Girl in a jacket" width="20" height="20">
+                                </div>
+                                <div layout="row" flex="100" ng-if="false"
+                                    style="height:50px; width:54px;padding-top: 22px;"><img src="cross.png"
+                                        alt="Girl in a jacket" width="20" height="20">
+                                </div>
+                            </div>
+                            <div ng-if="vm.dehumidifierProgress" layout="column" style="width: 30%;padding-top:25px"
+                                layout-align="center end">
+                                <md-progress-circular md-mode="determinate" value="{{vm.determinateValue}}">
+                                </md-progress-circular>
+                            </div>
+                            <div ng-if="!vm.dehumidifierProgress" layout="column" style="width: 30%;padding-top:25px"
+                                layout-align="center end">
+                            </div>
+                            <div layout="column" style="width: 20%; padding-right: 20px;" layout-align="center end">
+                                <md-switch ng-click="" aria-label="Switch 1" ng-disabled="true"
+                                    ng-model="">
+                                </md-switch>
+                            </div>
+                        </div>
+                        <div layout="row" style="width: 100%; padding-left: 15px; margin-bottom: 5px;">
+                            <div layout="column" style="width: 30%;" layout-align="center start">
+                                <div layout="row">
+                                    Smoke
+                                </div>
+                            </div>
+                            <div layout="column" style="width: 20%;margin-left: 20px;" layout-align="end start">
+                                <div layout="row" flex="100" ng-if="false"
+                                    style="height:50px; width:54px; padding-top: 22px;"><img src="tick.svg"
+                                        alt="Girl in a jacket" width="20" height="20">
+                                </div>
+                                <div layout="row" flex="100" ng-if="true"
+                                    style="height:50px; width:54px;padding-top: 22px;"><img src="cross.png"
+                                        alt="Girl in a jacket" width="20" height="20">
+                                </div>
+                            </div>
+                            <div ng-if="vm.dehumidifierProgress" layout="column" style="width: 30%;padding-top:25px"
+                                layout-align="center end">
+                                <md-progress-circular md-mode="determinate" value="{{vm.determinateValue}}">
+                                </md-progress-circular>
+                            </div>
+                            <div ng-if="!vm.dehumidifierProgress" layout="column" style="width: 30%;padding-top:25px"
+                                layout-align="center end">
+                            </div>
+                            <div layout="column" style="width: 20%; padding-right: 20px;" layout-align="center end">
+                                <md-switch ng-click="" aria-label="Switch 1" ng-disabled="true"
+                                    ng-model="">
+                                </md-switch>
+                            </div>
+                        </div>
+                        <div layout="row" style="width: 100%; padding-left: 15px; margin-bottom: 5px;">
+                            <div layout="column" style="width: 30%;" layout-align="center start">
+                                <div layout="row">
+                                    Motion
+                                </div>
+                            </div>
+                            <div layout="column" style="width: 20%;margin-left: 20px;" layout-align="end start">
+                                <div layout="row" flex="100" ng-if="false"
+                                    style="height:50px; width:54px; padding-top: 22px;"><img src="tick.svg"
+                                        alt="Girl in a jacket" width="20" height="20">
+                                </div>
+                                <div layout="row" flex="100" ng-if="true"
+                                    style="height:50px; width:54px;padding-top: 22px;"><img src="cross.png"
+                                        alt="Girl in a jacket" width="20" height="20">
+                                </div>
+                            </div>
+                            <div ng-if="vm.dehumidifierProgress" layout="column" style="width: 30%;padding-top:25px"
+                                layout-align="center end">
+                                <md-progress-circular md-mode="determinate" value="{{vm.determinateValue}}">
+                                </md-progress-circular>
+                            </div>
+                            <div ng-if="!vm.dehumidifierProgress" layout="column" style="width: 30%;padding-top:25px"
+                                layout-align="center end">
+                            </div>
+                            <div layout="column" style="width: 20%; padding-right: 20px;" layout-align="center end">
+                                <md-switch ng-click="" aria-label="Switch 1" ng-disabled="true"
+                                    ng-model="">
+                                </md-switch>
+                            </div>
+                        </div>
+
+
+
+
+                        
+                    </div>
+
+                </div>
+            </md-tab>
+
+
+
+            <md-tab label="Temperature">
+                <div layout="column" style="height: 750px; width: 100%;background-color: white;">
+                    <div layout="row" style="height: 100%; width: 100%;">
+                        <div layout="column" style="width: 15%; height: 100%; padding:5px; overflow-y: auto;">
+
+                            <div layout="row"
+                                style="height: 90px;width: 98%;padding-left: 5px; margin: 5px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 3px;"
+                                ng-class="{'red' : vm.currentMinMaxStatus.temperatureMax >= vm.temperatureMaxThreshold || vm.currentMinMaxStatus.temperaturMin <= vm.temperatureMinThreshold}">
+                                <div layout="column" style="height: 90px; width: 100%;" layout-align="center center">
+                                    <p>Date:
+                                        {{vm.currentMinMaxStatus.time[0]+vm.currentMinMaxStatus.time[1]+vm.currentMinMaxStatus.time[2]+vm.currentMinMaxStatus.time[3]}}-{{vm.currentMinMaxStatus.time[4]+vm.currentMinMaxStatus.time[5]}}-{{vm.currentMinMaxStatus.time[6]+vm.currentMinMaxStatus.time[7]}}
+                                    </p>
+                                    <h4> Min: {{vm.currentMinMaxStatus.temperatureMin}} Max:
+                                        {{vm.currentMinMaxStatus.temperatureMax}}</h4>
+
+
+                                </div>
+                            </div>
+
+
+
+                            <div layout="row"
+                                style="width: 98%;padding: 5px; margin: 5px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 3px;">
+                                <div layout="column" style="width: 100%;" layout-align="center center">
+                                    <table>
+                                        <tr>
+                                            <td>Date</td>
+                                            <td>Min</td>
+                                            <td>Max</td>
+                                        </tr>
+                                        <tr ng-repeat="item in vm.initial29DaysMinMax">
+                                            <td>{{item.sensorMinMaxStatus.time[0]+item.sensorMinMaxStatus.time[1]+item.sensorMinMaxStatus.time[2]+item.sensorMinMaxStatus.time[3]}}-{{item.sensorMinMaxStatus.time[4]+item.sensorMinMaxStatus.time[5]}}-{{item.sensorMinMaxStatus.time[6]+item.sensorMinMaxStatus.time[7]}}
+                                            </td>
+                                            <td
+                                                ng-class="{'red' : item.sensorMinMaxStatus.temperatureMin <= vm.temperatureMinThreshold}">
+                                                {{item.sensorMinMaxStatus.temperatureMin}}</td>
+                                            <td
+                                                ng-class="{'red' : item.sensorMinMaxStatus.temperatureMax >= vm.temperatureMaxThreshold}">
+                                                {{item.sensorMinMaxStatus.temperatureMax}}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div layout="column"
+                            style="width: 65%; height: 100%;overflow-y: auto;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 3px;">
+                            <div layout="row" style="width: 100%; height: 290px;">
+                                <div id="curve_chart_current_temperature" style="width: 100%; height: 100%"
+                                    layout="column"></div>
+                            </div>
+                            <div layout="row" style="width: 100%; height: 290px;">
+                                <div id="curve_chart_previous_temperature" style="width: 100%; height: 100%"
+                                    layout="column"></div>
+                            </div>
+                            <div layout="row" style="width: 100%; height: 290px;">
+                                <div id="curve_chart_earlier_temperature" style="width: 100%; height: 100%"
+                                    layout="column"></div>
+                            </div>
+                        </div>
+                        <div layout="column" style="width: 20%; height: 100%; padding: 10px">
+                            <div flex-gt-xs>
+                                <h4>Select Date and Hour to See Details:</h4>
+                                <div layout="row" style="widows: 100%;">
+                                    <div layout="column" style="width: 50%;">
+                                        <span>Select Date</span>
+                                        <md-datepicker ng-model="vm.myDate" md-placeholder="Enter date"
+                                            md-min-date="vm.minDate" md-max-date="vm.maxDate" ng-click="vm.clearHour()">
+                                        </md-datepicker>
+                                    </div>
+                                    <div layout="column" style="width: 50%; padding-left:10px; padding-top: 5px;">
+                                        <span>Select Hour</span>
+                                        <md-select ng-model="vm.selectedHourTemperature"
+                                            ng-change="vm.getDayHourSensorData('temperature')">
+                                            <md-optgroup label="Hour">
+                                                <md-option ng-repeat="item in vm.hours" ng-value="item">{{item}}
+                                                </md-option>
+                                            </md-optgroup>
+                                        </md-select>
+                                    </div>
+                                </div>
+
+                                <div layout="row" style="width: 100%; height: 650px;">
+                                    <div layout="column"
+                                        style="width: 100%; height: 100%; padding:5px; overflow-y: auto;">
+                                        <div layout="row"
+                                            style="width: 98%;padding: 5px; margin: 5px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 3px;">
+                                            <div layout="column" style=" width: 100%;" layout-align="center center">
+                                                <!-- <p>Date:
+                                                    
+                                                    Time:
+                                                    
+                                                </p>
+                                                <p>
+                                                    Temperature: 
+                                                </p> -->
+
+
+                                                <table>
+                                                    <tr>
+                                                        <td>Date</td>
+                                                        <td>Time</td>
+                                                        <td>Temperature</td>
+                                                    </tr>
+                                                    <tr ng-repeat="item in vm.temperatureReadingsForDateHour">
+                                                        <td>{{item.time[0]+item.time[1]+item.time[2]+item.time[3]}}-{{item.time[4]+item.time[5]}}-{{item.time[6]+item.time[7]}}
+                                                        </td>
+                                                        <td>{{item.time[8]+item.time[9]}}:{{item.time[10]+item.time[11]}}:{{item.time[12]+item.time[13]}}
+                                                        </td>
+                                                        <td
+                                                            ng-class="{'red' : item.temperature <= vm.temperatureMinThreshold || item.temperature >= vm.temperatureMaxThreshold}">
+                                                            {{item.temperature}}</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </md-tab>
+            <md-tab label="Noise">
+                <div layout="column" style="height: 750px; width: 100%;background-color: white;">
+                    <div layout="row" style="height: 100%; width: 100%;">
+                        <div layout="column" style="width: 15%; height: 100%; padding:5px; overflow-y: auto;">
+
+                            <div layout="row"
+                                style="height: 90px;width: 98%;padding-left: 5px; margin: 5px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 3px;"
+                                ng-class="{'red' : vm.currentMinMaxStatus.temperatureMax >= vm.temperatureMaxThreshold || vm.currentMinMaxStatus.temperaturMin <= vm.temperatureMinThreshold}">
+                                <div layout="column" style="height: 90px; width: 100%;" layout-align="center center">
+                                    <p>Date:
+                                        {{vm.currentMinMaxStatus.time[0]+vm.currentMinMaxStatus.time[1]+vm.currentMinMaxStatus.time[2]+vm.currentMinMaxStatus.time[3]}}-{{vm.currentMinMaxStatus.time[4]+vm.currentMinMaxStatus.time[5]}}-{{vm.currentMinMaxStatus.time[6]+vm.currentMinMaxStatus.time[7]}}
+                                    </p>
+                                    <h4> Min: {{vm.currentMinMaxStatus.noiseMin}} Max:
+                                        {{vm.currentMinMaxStatus.noiseMax}}</h4>
+
+
+                                </div>
+                            </div>
+
+
+
+                            <div layout="row"
+                                style="width: 98%;padding: 5px; margin: 5px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 3px;">
+                                <div layout="column" style="width: 100%;" layout-align="center center">
+                                    <table>
+                                        <tr>
+                                            <td>Date</td>
+                                            <td>Min</td>
+                                            <td>Max</td>
+                                        </tr>
+                                        <tr ng-repeat="item in vm.initial29DaysMinMax">
+                                            <td>{{item.sensorMinMaxStatus.time[0]+item.sensorMinMaxStatus.time[1]+item.sensorMinMaxStatus.time[2]+item.sensorMinMaxStatus.time[3]}}-{{item.sensorMinMaxStatus.time[4]+item.sensorMinMaxStatus.time[5]}}-{{item.sensorMinMaxStatus.time[6]+item.sensorMinMaxStatus.time[7]}}
+                                            </td>
+                                            <td
+                                                ng-class="{'red' : item.sensorMinMaxStatus.temperatureMin <= vm.temperatureMinThreshold}">
+                                                {{item.sensorMinMaxStatus.noiseMin}}</td>
+                                            <td
+                                                ng-class="{'red' : item.sensorMinMaxStatus.temperatureMax >= vm.temperatureMaxThreshold}">
+                                                {{item.sensorMinMaxStatus.noiseMax}}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div layout="column"
+                            style="width: 65%; height: 100%;overflow-y: auto;auto;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 3px;">
+                            <div layout="row" style="width: 100%; height: 290px;">
+                                <div id="curve_chart_current_noise" style="width: 100%; height: 100%" layout="column">
+                                </div>
+                            </div>
+                            <div layout="row" style="width: 100%; height: 290px;">
+                                <div id="curve_chart_previous_noise" style="width: 100%; height: 100%" layout="column">
+                                </div>
+                            </div>
+                            <div layout="row" style="width: 100%; height: 290px;">
+                                <div id="curve_chart_earlier_noise" style="width: 100%; height: 100%" layout="column">
+                                </div>
+                            </div>
+                        </div>
+                        <div layout="column" style="width: 20%; height: 100%; padding: 10px">
+                            <div flex-gt-xs>
+                                <h4>Select Date and Hour to See Details:</h4>
+                                <div layout="row" style="widows: 100%;">
+                                    <div layout="column" style="width: 50%;">
+                                        <span>Select Date</span>
+                                        <md-datepicker ng-model="vm.myDate" md-placeholder="Enter date"
+                                            md-min-date="vm.minDate" md-max-date="vm.maxDate" ng-click="vm.clearHour()">
+                                        </md-datepicker>
+                                    </div>
+                                    <div layout="column" style="width: 50%; padding-left:10px; padding-top: 5px;">
+                                        <span>Select Hour</span>
+                                        <md-select ng-model="vm.selectedHourNoise"
+                                            ng-change="vm.getDayHourSensorData('noise')">
+                                            <md-optgroup label="Hour">
+                                                <md-option ng-repeat="item in vm.hours" ng-value="item">{{item}}
+                                                </md-option>
+                                            </md-optgroup>
+                                        </md-select>
+                                    </div>
+                                </div>
+
+                                <div layout="row" style="width: 100%; height: 650px;">
+                                    <div layout="column"
+                                        style="width: 100%; height: 100%; padding:5px; overflow-y: auto;">
+                                        <div layout="row"
+                                            style="width: 98%;padding: 5px; margin: 5px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 3px;">
+                                            <div layout="column" style="width: 100%;" layout-align="center center">
+                                                <!-- <p>Date:
+                                                    {{item.time[0]+item.time[1]+item.time[2]+item.time[3]}}-{{item.time[4]+item.time[5]}}-{{item.time[6]+item.time[7]}}
+                                                    Time:
+                                                    {{item.time[8]+item.time[9]}}:{{item.time[10]+item.time[11]}}:{{item.time[12]+item.time[13]}}
+                                                </p>
+                                                <p>
+                                                    NoiseMin: {{item.sensorInfo.noiseMin}} NoiseMin:
+                                                    {{item.sensorInfo.noiseMax}}
+                                                </p> -->
+
+                                                <table>
+                                                    <tr>
+                                                        <td>Date</td>
+                                                        <td>Time</td>
+                                                        <td>Noise</td>
+                                                    </tr>
+                                                    <tr ng-repeat="item in vm.noiseReadingsForDateHour">
+                                                        <td>{{item.time[0]+item.time[1]+item.time[2]+item.time[3]}}-{{item.time[4]+item.time[5]}}-{{item.time[6]+item.time[7]}}
+                                                        </td>
+                                                        <td>{{item.time[8]+item.time[9]}}:{{item.time[10]+item.time[11]}}:{{item.time[12]+item.time[13]}}
+                                                        </td>
+                                                        <td
+                                                            ng-class="{'red' : item.noiseLevel[4] <= vm.noiseMinThreshold || item.noiseLevel[4] >= vm.noiseMaxThreshold}">
+                                                            {{item.noiseLevel[4]}}</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </md-tab>
+            <md-tab label="Humidity">
+                <div layout="column" style="height: 750px; width: 100%;background-color: white;">
+                    <div layout="row" style="height: 100%; width: 100%;">
+                        <div layout="column" style="width: 15%; height: 100%; padding:5px; overflow-y: auto;">
+
+                            <div layout="row"
+                                style="height: 90px;width: 98%;padding-left: 5px; margin: 5px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 3px;"
+                                ng-class="{'red' : vm.currentMinMaxStatus.humidityMax >= vm.humidityMaxThreshold || vm.currentMinMaxStatus.humidityMin <= vm.humidityMinThreshold}">
+                                <div layout="column" style="height: 90px; width: 100%;" layout-align="center center">
+                                    <p>Date:
+                                        {{vm.currentMinMaxStatus.time[0]+vm.currentMinMaxStatus.time[1]+vm.currentMinMaxStatus.time[2]+vm.currentMinMaxStatus.time[3]}}-{{vm.currentMinMaxStatus.time[4]+vm.currentMinMaxStatus.time[5]}}-{{vm.currentMinMaxStatus.time[6]+vm.currentMinMaxStatus.time[7]}}
+                                    </p>
+                                    <h4> Min: {{vm.currentMinMaxStatus.humidityMin}} Max:
+                                        {{vm.currentMinMaxStatus.humidityMax}}</h4>
+                                </div>
+                            </div>
+
+
+                            <div layout="row"
+                                style="width: 98%;padding: 5px; margin: 5px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 3px;">
+                                <div layout="column" style="width: 100%;" layout-align="center center">
+                                    <!-- <p>Date:
+                                        {{item.sensorMinMaxStatus.time[0]+item.sensorMinMaxStatus.time[1]+item.sensorMinMaxStatus.time[2]+item.sensorMinMaxStatus.time[3]}}-{{item.sensorMinMaxStatus.time[4]+item.sensorMinMaxStatus.time[5]}}-{{item.sensorMinMaxStatus.time[6]+item.sensorMinMaxStatus.time[7]}}
+                                    </p>
+                                    <h4> Min: {{item.sensorMinMaxStatus.humidityMin}} Max:
+                                        {{item.sensorMinMaxStatus.humidityMax}}</h4> -->
+
+                                    <table>
+                                        <tr>
+                                            <td>Date</td>
+                                            <td>Min</td>
+                                            <td>Max</td>
+                                        </tr>
+                                        <tr ng-repeat="item in vm.initial29DaysMinMax">
+                                            <td>{{item.sensorMinMaxStatus.time[0]+item.sensorMinMaxStatus.time[1]+item.sensorMinMaxStatus.time[2]+item.sensorMinMaxStatus.time[3]}}-{{item.sensorMinMaxStatus.time[4]+item.sensorMinMaxStatus.time[5]}}-{{item.sensorMinMaxStatus.time[6]+item.sensorMinMaxStatus.time[7]}}
+                                            </td>
+                                            <td
+                                                ng-class="{'red' : item.sensorMinMaxStatus.humidityMin <= vm.humidityMinThreshold}">
+                                                {{item.sensorMinMaxStatus.humidityMin}}</td>
+                                            <td
+                                                ng-class="{'red' : item.sensorMinMaxStatus.humidityMax >= vm.humidityMaxThreshold}">
+                                                {{item.sensorMinMaxStatus.humidityMax}}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div layout="column"
+                            style="width: 65%; height: 100%;overflow-y: auto;auto;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 3px;">
+                            <div layout="row" style="width: 100%; height: 290px;">
+                                <div id="curve_chart_current_humidity" style="width: 100%; height: 100%"
+                                    layout="column"></div>
+                            </div>
+                            <div layout="row" style="width: 100%; height: 290px;">
+                                <div id="curve_chart_previous_humidity" style="width: 100%; height: 100%"
+                                    layout="column"></div>
+                            </div>
+                            <div layout="row" style="width: 100%; height: 290px;">
+                                <div id="curve_chart_earlier_humidity" style="width: 100%; height: 100%"
+                                    layout="column"></div>
+                            </div>
+                        </div>
+                        <div layout="column" style="width: 20%; height: 100%; padding: 10px">
+                            <div flex-gt-xs>
+                                <h4>Select Date and Hour to See Details:</h4>
+                                <div layout="row" style="widows: 100%;">
+                                    <div layout="column" style="width: 50%;">
+                                        <span>Select Date</span>
+                                        <md-datepicker ng-model="vm.myDate" md-placeholder="Enter date"
+                                            md-min-date="vm.minDate" md-max-date="vm.maxDate" ng-click="vm.clearHour()">
+                                        </md-datepicker>
+                                    </div>
+                                    <div layout="column" style="width: 50%; padding-left:10px; padding-top: 5px;">
+                                        <span>Select Hour</span>
+                                        <md-select ng-model="vm.selectedHourHumidity"
+                                            ng-change="vm.getDayHourSensorData('humidity')">
+                                            <md-optgroup label="Hour">
+                                                <md-option ng-repeat="item in vm.hours" ng-value="item">{{item}}
+                                                </md-option>
+                                            </md-optgroup>
+                                        </md-select>
+                                    </div>
+                                </div>
+
+                                <div layout="row" style="width: 100%; height: 650px;">
+                                    <div layout="column"
+                                        style="width: 100%; height: 100%; padding:5px; overflow-y: auto;">
+                                        <div layout="row"
+                                            style="width: 98%;padding: 5px; margin: 5px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 3px;">
+                                            <div layout="column" style="width: 100%;" layout-align="center center">
+                                                <!-- <p>Date:
+                                                    {{item.time[0]+item.time[1]+item.time[2]+item.time[3]}}-{{item.time[4]+item.time[5]}}-{{item.time[6]+item.time[7]}}
+                                                    Time:
+                                                    {{item.time[8]+item.time[9]}}:{{item.time[10]+item.time[11]}}:{{item.time[12]+item.time[13]}}
+                                                </p>
+                                                <p>
+                                                    Humidity: {{item.sensorInfo.humidity}}
+                                                </p> -->
+
+                                                <table>
+                                                    <tr>
+                                                        <td>Date</td>
+                                                        <td>Time</td>
+                                                        <td>Humidity</td>
+                                                    </tr>
+                                                    <tr ng-repeat="item in vm.humidityReadingsForDateHour">
+                                                        <td>{{item.time[0]+item.time[1]+item.time[2]+item.time[3]}}-{{item.time[4]+item.time[5]}}-{{item.time[6]+item.time[7]}}
+                                                        </td>
+                                                        <td>{{item.time[8]+item.time[9]}}:{{item.time[10]+item.time[11]}}:{{item.time[12]+item.time[13]}}
+                                                        </td>
+                                                        <td
+                                                            ng-class="{'red' : item.humidity <= vm.humidityMinThreshold || item.humidity >= vm.humidityMaxThreshold}">
+                                                            {{item.humidity}}</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </md-tab>
+            <md-tab label="Light">
+                <div layout="column" style="height: 750px; width: 100%;background-color: white;">
+                    <div layout="row" style="height: 100%; width: 100%;">
+                        <div layout="column" style="width: 15%; height: 100%; padding:5px; overflow-y: auto;">
+
+
+                            <div layout="row"
+                                style="height: 90px;width: 98%;padding-left: 5px; margin: 5px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 3px;"
+                                ng-class="{'red' : vm.currentMinMaxStatus.lightMax >= vm.lightMaxThreshold || vm.currentMinMaxStatus.lightMin <= vm.lightMinThreshold}">
+                                <div layout="column" style="height: 90px; width: 100%;" layout-align="center center">
+                                    <p>Date:
+                                        {{vm.currentMinMaxStatus.time[0]+vm.currentMinMaxStatus.time[1]+vm.currentMinMaxStatus.time[2]+vm.currentMinMaxStatus.time[3]}}-{{vm.currentMinMaxStatus.time[4]+vm.currentMinMaxStatus.time[5]}}-{{vm.currentMinMaxStatus.time[6]+vm.currentMinMaxStatus.time[7]}}
+                                    </p>
+                                    <h4> Min: {{vm.currentMinMaxStatus.lightMin.toFixed(2)}} Max:
+                                        {{vm.currentMinMaxStatus.lightMax.toFixed(2)}}</h4>
+                                </div>
+                            </div>
+
+
+                            <div layout="row"
+                                style="width: 98%;padding: 5px; margin: 5px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 3px;">
+                                <div layout="column" style="width: 100%;" layout-align="center center">
+                                    <!-- <p>Date:
+                                        {{item.sensorMinMaxStatus.time[0]+item.sensorMinMaxStatus.time[1]+item.sensorMinMaxStatus.time[2]+item.sensorMinMaxStatus.time[3]}}-{{item.sensorMinMaxStatus.time[4]+item.sensorMinMaxStatus.time[5]}}-{{item.sensorMinMaxStatus.time[6]+item.sensorMinMaxStatus.time[7]}}
+                                    </p>
+                                    <h4> Min: {{item.sensorMinMaxStatus.lightMin}} Max:
+                                        {{item.sensorMinMaxStatus.lightMax}}</h4> -->
+
+                                    <table>
+                                        <tr>
+                                            <td>Date</td>
+                                            <td>Min</td>
+                                            <td>Max</td>
+                                        </tr>
+                                        <tr ng-repeat="item in vm.initial29DaysMinMax">
+                                            <td>{{item.sensorMinMaxStatus.time[0]+item.sensorMinMaxStatus.time[1]+item.sensorMinMaxStatus.time[2]+item.sensorMinMaxStatus.time[3]}}-{{item.sensorMinMaxStatus.time[4]+item.sensorMinMaxStatus.time[5]}}-{{item.sensorMinMaxStatus.time[6]+item.sensorMinMaxStatus.time[7]}}
+                                            </td>
+                                            <td
+                                                ng-class="{'red' : item.sensorMinMaxStatus.lightMin <= vm.lightMinThreshold}">
+                                                {{item.sensorMinMaxStatus.lightMin.toFixed(2)}}</td>
+                                            <td
+                                                ng-class="{'red' : item.sensorMinMaxStatus.lightMax >= vm.lightMaxThreshold}">
+                                                {{item.sensorMinMaxStatus.lightMax.toFixed(2)}}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div layout="column"
+                            style="width: 65%; height: 100%;overflow-y: auto;auto;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 3px;">
+                            <div layout="row" style="width: 100%; height: 290px;">
+                                <div id="curve_chart_current_light" style="width: 100%; height: 100%" layout="column">
+                                </div>
+                            </div>
+                            <div layout="row" style="width: 100%; height: 290px;">
+                                <div id="curve_chart_previous_light" style="width: 100%; height: 100%" layout="column">
+                                </div>
+                            </div>
+                            <div layout="row" style="width: 100%; height: 290px;">
+                                <div id="curve_chart_earlier_light" style="width: 100%; height: 100%" layout="column">
+                                </div>
+                            </div>
+                        </div>
+                        <div layout="column" style="width: 20%; height: 100%; padding: 10px">
+                            <div flex-gt-xs>
+                                <h4>Select Date and Hour to See Details:</h4>
+                                <div layout="row" style="width: 100%;">
+                                    <div layout="column" style="width: 50%;">
+                                        <span>Select Date</span>
+                                        <md-datepicker ng-model="vm.myDate" md-placeholder="Enter date"
+                                            md-min-date="vm.minDate" md-max-date="vm.maxDate" ng-click="vm.clearHour()">
+                                        </md-datepicker>
+                                    </div>
+                                    <div layout="column" style="width: 50%; padding-left:10px; padding-top: 5px;">
+                                        <span>Select Hour</span>
+                                        <md-select ng-model="vm.selectedHourLight"
+                                            ng-change="vm.getDayHourSensorData('light')">
+                                            <md-optgroup label="Hour">
+                                                <md-option ng-repeat="item in vm.hours" ng-value="item">{{item}}
+                                                </md-option>
+                                            </md-optgroup>
+                                        </md-select>
+                                    </div>
+                                </div>
+
+                                <div layout="row" style="width: 100%; height: 650px;">
+                                    <div layout="column"
+                                        style="width: 100%; height: 100%; padding:5px; overflow-y: auto;">
+                                        <div layout="row"
+                                            style="width: 98%;padding: 5px; margin: 5px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 3px;">
+                                            <div layout="column" style="width: 100%;" layout-align="center center">
+                                                <!-- <p>Date:
+                                                    {{item.time[0]+item.time[1]+item.time[2]+item.time[3]}}-{{item.time[4]+item.time[5]}}-{{item.time[6]+item.time[7]}}
+                                                    Time:
+                                                    {{item.time[8]+item.time[9]}}:{{item.time[10]+item.time[11]}}:{{item.time[12]+item.time[13]}}
+                                                </p>
+                                                <p>
+                                                    Light: {{item.sensorInfo.light.toFixed(2)}} lux
+                                                </p> -->
+
+
+                                                <table>
+                                                    <tr>
+                                                        <td>Date</td>
+                                                        <td>Time</td>
+                                                        <td>Light</td>
+                                                    </tr>
+                                                    <tr ng-repeat="item in vm.lightReadingsForDateHour">
+                                                        <td>{{item.time[0]+item.time[1]+item.time[2]+item.time[3]}}-{{item.time[4]+item.time[5]}}-{{item.time[6]+item.time[7]}}
+                                                        </td>
+                                                        <td>{{item.time[8]+item.time[9]}}:{{item.time[10]+item.time[11]}}:{{item.time[12]+item.time[13]}}
+                                                        </td>
+                                                        <td
+                                                            ng-class="{'red' : item.light <= vm.lightMinThreshold || item.light >= vm.lightMaxThreshold}">
+                                                            {{item.light.toFixed(2)}}</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </md-tab>
+            <md-tab label="Thresholds">
+                <md-content class="md-padding">
+
+                    <div layout="column" style="width: 100%; height: 750px;">
+                        <div layout="row" style="height: 60%; width: 100%;">
+                            <div layout="column" style="width: 20%; height: 100%;"></div>
+                            <div layout="column" style="width: 20%; height: 100%;">
+                                <div class="cardThreshold"
+                                    style="margin-top: 10px; margin-left: 15px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 10px;padding-top:10px;">
+                                    <h2>Temperature</h2>
+                                    <img src="hot.png" alt="Girl in a jacket" width="70px" height="70px">
+                                    <!-- <h3>Cloudy<span>Wind 10km/h <span class="dot">•</span> Precip 0%</span></h3> -->
+                                    <h3>Threshold</h3>
+                                    Min: <input type="text" value="10">
+                                    Max: <input type="text" value="45">
+                                    <md-button class="md-raised md-primary">Apply</md-button>
+                                </div>
+                            </div>
+                            <div layout="column" style="width: 20%; height: 100%;">
+                                <div class="cardThreshold"
+                                    style="margin-top: 10px; margin-left: 15px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 10px;padding-top:10px;">
+                                    <h2>Humidity</h2>
+                                    <img src="humIcon.png" alt="Girl in a jacket" width="70px" height="70px">
+                                    <!-- <h3>Cloudy<span>Wind 10km/h <span class="dot">•</span> Precip 0%</span></h3> -->
+                                    <h3>Threshold</h3>
+                                    Min: <input type="text" value="10">
+                                    Max: <input type="text" value="45">
+                                    <md-button class="md-raised md-primary">Apply</md-button>
+                                </div>
+                            </div>
+                            <div layout="column" style="width: 20%; height: 100%;">
+                                <div class="cardThreshold"
+                                    style="margin-top: 10px; margin-left: 15px;box-shadow: 0 0 5px #b3d4ee, 0 0 5px #665d5d, 0 0 5px #413a3c; border-radius: 10px;padding-top:10px;">
+                                    <h2>Light</h2>
+                                    <img src="lightIcon.png" alt="Girl in a jacket" width="70px" height="70px">
+                                    <!-- <h3>Cloudy<span>Wind 10km/h <span class="dot">•</span> Precip 0%</span></h3> -->
+                                    <h3>Threshold</h3>
+                                    Min: <input type="text" value="10">
+                                    Max: <input type="text" value="45">
+                                    <md-button class="md-raised md-primary">Apply</md-button>
+                                </div>
+                            </div>
+                            <div layout="column" style="width: 20%; height: 100%;"></div>
+                        </div>
+                    </div>
+
+                </md-content>
+            </md-tab>
+
+        </md-tabs>
+
+    </div>
+</body>
+
+</html>
